@@ -1,16 +1,25 @@
 // ═══════════════════════════════════════════════════════════════
 //  QR SHIELD — script.js
-//  Points to /api/analyze (Vercel serverless function)
+//  QR decoding done in browser via jsQR (no Python libs needed)
+//  Backend /api/analyze handles Claude AI + VirusTotal
 // ═══════════════════════════════════════════════════════════════
 
 const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*<>?/|\\[]{}~';
 const rand  = () => CHARS[Math.floor(Math.random() * CHARS.length)];
 
 // ── BACKEND CONFIG ────────────────────────────────────────────
-// /api/analyze works on both localhost (via vercel dev) and production
-const BACKEND_URL     = '';                              // empty = same domain
-const API_ENDPOINT    = '/api/analyze';                 // Vercel serverless function
-const QRSHIELD_SECRET = 'change-this-to-your-secret';  // must match QRSHIELD_SECRET on Vercel
+const BACKEND_URL     = '';
+const API_ENDPOINT    = '/api/analyze';
+const QRSHIELD_SECRET = 'change-this-to-your-secret'; // match Vercel env var
+
+
+// ── LOAD jsQR DYNAMICALLY ─────────────────────────────────────
+// jsQR is a pure JS QR decoder — no Python libs needed on server
+(function loadJsQR() {
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js';
+  document.head.appendChild(script);
+})();
 
 
 // ── GLITCH LOGO ───────────────────────────────────────────────
@@ -125,13 +134,77 @@ function handleFile(e) {
   if (file) processFile(file);
 }
 
+/**
+ * Decodes QR from image using jsQR (runs in browser, no server needed).
+ * If QR found → scans the decoded URL directly.
+ * If no QR found → shows error message.
+ */
 function processFile(file) {
   const label = document.getElementById('selectedFile');
   label.style.display = 'block';
   label.textContent   = '📎 ' + file.name;
+
   const reader = new FileReader();
-  reader.onload = ev => runScanWithImage(file.name, ev.target.result);
+  reader.onload = function(ev) {
+    const img = new Image();
+    img.onload = function() {
+      // Draw image to canvas to extract pixel data for jsQR
+      const canvas  = document.createElement('canvas');
+      canvas.width  = img.width;
+      canvas.height = img.height;
+      const ctx     = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+      // Wait for jsQR to load if it hasn't yet
+      function tryDecode(attempts) {
+        if (typeof jsQR === 'undefined') {
+          if (attempts > 20) {
+            showUploadError('jsQR library failed to load. Try pasting the URL manually.');
+            return;
+          }
+          setTimeout(() => tryDecode(attempts + 1), 200);
+          return;
+        }
+
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: 'dontInvert'
+        });
+
+        if (code && code.data) {
+          // QR decoded successfully — scan the URL
+          document.getElementById('urlInput').value = code.data;
+          label.textContent = `📎 ${file.name} → ${code.data.slice(0, 40)}${code.data.length > 40 ? '…' : ''}`;
+          runScan(code.data);
+        } else {
+          // Try inverted (some QR codes have inverted colors)
+          const codeInv = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: 'onlyInvert'
+          });
+          if (codeInv && codeInv.data) {
+            document.getElementById('urlInput').value = codeInv.data;
+            label.textContent = `📎 ${file.name} → ${codeInv.data.slice(0, 40)}…`;
+            runScan(codeInv.data);
+          } else {
+            showUploadError('No QR code found in image. Make sure the image contains a clear QR code.');
+          }
+        }
+      }
+
+      tryDecode(0);
+    };
+    img.src = ev.target.result;
+  };
   reader.readAsDataURL(file);
+}
+
+function showUploadError(msg) {
+  const label = document.getElementById('selectedFile');
+  label.style.display = 'block';
+  label.textContent   = '⚠️ ' + msg;
+  label.style.color   = 'var(--red)';
+  document.querySelector('.scan-btn').disabled = false;
 }
 
 
@@ -152,7 +225,7 @@ function clearStepTimers() {
 }
 
 function animateScanSteps(onComplete) {
-  const steps = ['step1','step2','step3','step4'];
+  const steps  = ['step1','step2','step3','step4'];
   const labels = [
     '▶ Parsing URL structure...',
     '▶ Running heuristic checks...',
@@ -162,7 +235,7 @@ function animateScanSteps(onComplete) {
 
   steps.forEach((id, i) => {
     const el = document.getElementById(id);
-    el.className = 'scan-step';
+    el.className   = 'scan-step';
     el.textContent = labels[i];
   });
 
@@ -185,24 +258,14 @@ function animateScanSteps(onComplete) {
 }
 
 
-// ── SCAN ORCHESTRATORS ────────────────────────────────────────
+// ── SCAN ORCHESTRATOR ─────────────────────────────────────────
 function runScan(input) {
   _startScanUI();
   clearStepTimers();
   animateScanSteps(() => {
-    analyzeThreat(input, null)
+    analyzeThreat(input)
       .then(result => { _endScanUI(); showResult(input, result); })
       .catch(err   => { _endScanUI(); showErrorResult(input, err.message); });
-  });
-}
-
-function runScanWithImage(filename, base64) {
-  _startScanUI();
-  clearStepTimers();
-  animateScanSteps(() => {
-    analyzeThreat(filename, base64)
-      .then(result => { _endScanUI(); showResult(filename, result); })
-      .catch(err   => { _endScanUI(); showErrorResult(filename, err.message); });
   });
 }
 
@@ -220,21 +283,18 @@ function _endScanUI() {
 
 
 // ═══════════════════════════════════════════════════════════════
-//  CORE: SECURE API CALL → /api/analyze (Vercel function)
+//  CORE: SECURE API CALL → /api/analyze
+//  QR decoding is now done in browser — backend only gets URLs
 // ═══════════════════════════════════════════════════════════════
 
-async function analyzeThreat(input, imageBase64) {
-  const payload = imageBase64
-    ? { type: 'image', filename: input, image_data: imageBase64 }
-    : { type: 'url',   input: input };
-
+async function analyzeThreat(urlInput) {
   const response = await fetch(`${BACKEND_URL}${API_ENDPOINT}`, {
     method:  'POST',
     headers: {
       'Content-Type':      'application/json',
       'X-QRShield-Secret': QRSHIELD_SECRET,
     },
-    body: JSON.stringify(payload)
+    body: JSON.stringify({ type: 'url', input: urlInput })
   });
 
   if (response.status === 429) {
@@ -372,4 +432,4 @@ document.querySelectorAll('.feat-card, .step, .threat-card').forEach(el => obser
 
 document.getElementById('urlInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') scanURL();
-});
+});;
