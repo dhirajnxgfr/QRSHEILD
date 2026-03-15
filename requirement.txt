@@ -1,0 +1,9 @@
+flask
+flask-cors
+anthropic
+opencv-python-headless
+pyzbar
+pillow
+requests
+
+thats it
