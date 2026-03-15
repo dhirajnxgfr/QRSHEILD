@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#030811" />
+  <meta name="description" content="QR Shield — Instantly detect phishing, malware & fraud in any QR code." />
+  <title>QR Shield — Stop QR Fraud Before It Starts</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">
+    <div class="nav-logo-icon">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <rect x="2"  y="2"  width="6" height="6" stroke="#00ffe0" stroke-width="1.5"/>
+        <rect x="12" y="2"  width="6" height="6" stroke="#00ffe0" stroke-width="1.5"/>
+        <rect x="2"  y="12" width="6" height="6" stroke="#00ffe0" stroke-width="1.5"/>
+        <rect x="13" y="13" width="4" height="4" fill="#00ffe0"/>
+      </svg>
+    </div>
+    <span class="nav-logo-text">
+      <span class="glitch-logo">QR<span>SHIELD</span></span>
+    </span>
+  </a>
+  <div class="nav-links">
+    <a href="#features">FEATURES</a>
+    <a href="#demo">DEMO</a>
+    <a href="#how">HOW IT WORKS</a>
+    <a href="#download" class="nav-cta">DOWNLOAD APP</a>
+  </div>
+  <div class="nav-hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════ HERO -->
+<section id="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+
+  <div class="hero-badge">THREAT DETECTION SYSTEM ACTIVE</div>
+
+  <h1 class="hero-title">
+    SCAN.<span class="line2">DETECT.</span>
+    <span class="line3">STAY PROTECTED</span>
+  </h1>
+
+  <p class="hero-sub">
+    QR Shield analyzes any QR code in real-time — catching phishing links,
+    malware payloads, and fraudulent redirects before they reach you.
+  </p>
+
+  <div class="hero-btns">
+    <a href="#demo"     class="btn-primary">TRY LIVE DEMO</a>
+    <a href="#download" class="btn-secondary">GET THE APP</a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <span class="hero-stat-num">90<span>+</span></span>
+      <div class="hero-stat-label">THREAT ENGINES</div>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-num">8</span>
+      <div class="hero-stat-label">HEURISTIC CHECKS</div>
+    </div>
+    <div class="hero-stat">
+      <span class="hero-stat-num">0.<span>3s</span></span>
+      <div class="hero-stat-label">AVG SCAN TIME</div>
+    </div>
+  </div>
+
+  <div class="scroll-hint">SCROLL</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════ FEATURES -->
+<section id="features">
+  <div class="section-label">CAPABILITIES</div>
+  <h2 class="section-title">MULTI-LAYER<br><span>PROTECTION</span></h2>
+  <p class="section-sub">Every QR code passes through our full threat analysis stack — from pixel to payload.</p>
+
+  <div class="features-grid">
+    <div class="feat-card">
+      <div class="feat-num">01</div>
+      <span class="feat-icon">🔍</span>
+      <div class="feat-title">QR DECODING</div>
+      <p class="feat-desc">OpenCV + pyzbar powered decoding supports all QR variants, including damaged and low-contrast codes.</p>
+      <span class="feat-tag">OpenCV · pyzbar</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">02</div>
+      <span class="feat-icon">🧠</span>
+      <div class="feat-title">HEURISTIC ANALYSIS</div>
+      <p class="feat-desc">8 built-in checks detect typosquatting, suspicious TLDs, redirect chains, and URL obfuscation patterns.</p>
+      <span class="feat-tag">8 CHECKS</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">03</div>
+      <span class="feat-icon">🛡️</span>
+      <div class="feat-title">VIRUSTOTAL API</div>
+      <p class="feat-desc">Cross-referenced against 90+ security engines. Any known malicious URL is flagged instantly.</p>
+      <span class="feat-tag">90+ ENGINES</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">04</div>
+      <span class="feat-icon">🌐</span>
+      <div class="feat-title">GOOGLE SAFE BROWSING</div>
+      <p class="feat-desc">Google's real-time threat database checked for phishing and malware sites, updated continuously.</p>
+      <span class="feat-tag">REAL-TIME</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">05</div>
+      <span class="feat-icon">📊</span>
+      <div class="feat-title">RISK SCORING</div>
+      <p class="feat-desc">A 0–100 composite risk score combines all signals to deliver a clear SAFE / WARN / DANGER verdict.</p>
+      <span class="feat-tag">0–100 SCORE</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-num">06</div>
+      <span class="feat-icon">📱</span>
+      <div class="feat-title">ANDROID APP</div>
+      <p class="feat-desc">Native Kotlin app with live camera scanning, offline heuristics, and scan history dashboard built-in.</p>
+      <span class="feat-tag">KOTLIN · ANDROID</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════ DEMO -->
+<section id="demo">
+  <div class="demo-inner">
+    <div class="section-label">LIVE DEMO</div>
+    <h2 class="section-title">TRY IT<br><span>NOW</span></h2>
+    <p class="section-sub">Upload a QR image or paste a URL. Our AI engine will analyze it for threats in real-time.</p>
+
+    <div class="demo-layout">
+
+      <!-- Input panel -->
+      <div class="demo-panel">
+        <div class="demo-panel-head">
+          <div class="demo-dot r"></div>
+          <div class="demo-dot y"></div>
+          <div class="demo-dot g"></div>
+          <span>scanner.input</span>
+        </div>
+        <div class="demo-panel-body">
+          <div class="upload-zone" id="uploadZone">
+            <input type="file" id="fileInput" accept="image/*" onchange="handleFile(event)" />
+            <span class="upload-icon">⬆</span>
+            <div class="upload-text">
+              <strong>Drop QR image here</strong><br>
+              or click to browse<br>
+              PNG · JPG · WEBP
+            </div>
+          </div>
+          <div class="demo-or">OR PASTE URL</div>
+          <div class="url-row">
+            <input class="url-field" id="urlInput" type="text" placeholder="https://suspicious-link.com/pay" />
+            <button class="scan-btn" onclick="scanURL()">SCAN</button>
+          </div>
+          <div id="selectedFile" class="selected-file-label"></div>
+
+          <!-- AI Engine status -->
+          <div class="engine-status">
+            <div class="engine-dot"></div>
+            <span class="engine-label">AI THREAT ENGINE ONLINE</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result panel -->
+      <div class="demo-panel">
+        <div class="demo-panel-head">
+          <div class="demo-dot r"></div>
+          <div class="demo-dot y"></div>
+          <div class="demo-dot g"></div>
+          <span>scanner.result</span>
+        </div>
+        <div class="demo-panel-body">
+
+          <div class="result-empty" id="resultEmpty">
+            <span class="result-empty-icon">🛡</span>
+            <div class="result-empty-text">Awaiting scan input…<br>No threats detected yet.</div>
+          </div>
+
+          <div class="scanning" id="scanning">
+            <div class="scan-anim"></div>
+            <div class="scan-text" id="scanStatusText">INITIALIZING THREAT ANALYSIS...</div>
+            <div class="scan-steps" id="scanSteps">
+              <div class="scan-step" id="step1">▶ Parsing URL structure...</div>
+              <div class="scan-step" id="step2">▶ Running heuristic checks...</div>
+              <div class="scan-step" id="step3">▶ Querying threat databases...</div>
+              <div class="scan-step" id="step4">▶ Computing risk score...</div>
+            </div>
+          </div>
+
+          <div class="result-card" id="resultCard">
+            <div class="verdict-bar" id="verdictBar">
+              <span id="verdictText">SAFE</span>
+              <div class="score-ring">
+                <svg width="64" height="64" viewBox="0 0 64 64">
+                  <circle cx="32" cy="32" r="26" fill="none" stroke="#102040" stroke-width="4"/>
+                  <circle cx="32" cy="32" r="26" fill="none" stroke="currentColor" stroke-width="4"
+                    stroke-dasharray="163.4" id="scoreArc" stroke-dashoffset="163.4" stroke-linecap="round"/>
+                </svg>
+                <div class="score-ring-num" id="scoreNum">0</div>
+              </div>
+            </div>
+            <div class="url-decoded" id="urlDecoded">—</div>
+            <ul class="check-list" id="checkList"></ul>
+
+            <!-- AI Analysis Summary -->
+            <div class="ai-summary" id="aiSummary" style="display:none;">
+              <div class="ai-summary-header">
+                <span class="ai-icon">🤖</span>
+                <span class="ai-label">AI ANALYSIS</span>
+              </div>
+              <p class="ai-text" id="aiText"></p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <p class="demo-note">
+      ⚡ Powered by Claude AI — real threat analysis on every scan.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ HOW IT WORKS -->
+<section id="how">
+  <div class="how-inner">
+    <div class="section-label">PROCESS</div>
+    <h2 class="section-title">HOW IT<br><span>WORKS</span></h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <span class="step-icon">📷</span>
+        <div class="step-title">CAPTURE</div>
+        <p class="step-desc">Upload a QR image or point your phone camera at any QR code in the wild.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <span class="step-icon">⚙️</span>
+        <div class="step-title">DECODE</div>
+        <p class="step-desc">OpenCV extracts the raw URL or payload from the QR matrix data.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <span class="step-icon">🔬</span>
+        <div class="step-title">ANALYZE</div>
+        <p class="step-desc">8 heuristics + VirusTotal + Google Safe Browsing run in parallel.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <span class="step-icon">✅</span>
+        <div class="step-title">VERDICT</div>
+        <p class="step-desc">Risk score 0–100 with a clear SAFE / WARN / DANGER result delivered instantly.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ THREAT TYPES -->
+<section id="threats">
+  <div class="section-label">THREAT INTEL</div>
+  <h2 class="section-title">WHAT WE<br><span>DETECT</span></h2>
+  <p class="section-sub">QR codes are increasingly weaponized. QR Shield catches them all.</p>
+
+  <div class="threats-grid">
+    <div class="threat-card">
+      <div class="threat-icon-wrap">🎣</div>
+      <div>
+        <div class="threat-title">PHISHING SITES</div>
+        <p class="threat-desc">Fake banking, payment, and login pages designed to steal credentials via convincing QR code redirects.</p>
+        <span class="threat-badge high">HIGH RISK</span>
+      </div>
+    </div>
+    <div class="threat-card">
+      <div class="threat-icon-wrap">☣️</div>
+      <div>
+        <div class="threat-title">MALWARE PAYLOADS</div>
+        <p class="threat-desc">QR codes that trigger automatic APK downloads, drive-by installs, or malicious scripts on scan.</p>
+        <span class="threat-badge high">HIGH RISK</span>
+      </div>
+    </div>
+    <div class="threat-card">
+      <div class="threat-icon-wrap">🔀</div>
+      <div>
+        <div class="threat-title">REDIRECT CHAINS</div>
+        <p class="threat-desc">Multi-hop redirect sequences that obscure the final malicious destination from casual inspection.</p>
+        <span class="threat-badge med">MEDIUM RISK</span>
+      </div>
+    </div>
+    <div class="threat-card">
+      <div class="threat-icon-wrap">🧬</div>
+      <div>
+        <div class="threat-title">TYPOSQUATTING</div>
+        <p class="threat-desc">Lookalike domains mimicking trusted brands — e.g. paypa1.com, amaz0n-secure.net — caught by heuristics.</p>
+        <span class="threat-badge med">MEDIUM RISK</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════ DOWNLOAD APP -->
+<section id="download">
+  <div class="section-label">MOBILE APP</div>
+  <h2 class="section-title">PROTECT YOUR<br><span>PHONE</span></h2>
+  <p class="section-sub">The QR Shield Android app brings full threat detection to your camera in real-time.</p>
+
+  <div class="download-layout">
+
+    <!-- Phone mockup -->
+    <div class="phone-mockup">
+      <div class="phone-glow"></div>
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="phone-status">
+            <span>9:41</span><span>📶 🔋</span>
+          </div>
+          <div class="phone-app-head">
+            <div class="p-logo">
+              <span class="glitch-logo">QRSHIELD</span>
+            </div>
+          </div>
+          <div class="phone-viewfinder">
+            <div class="phone-vf-corner tl"></div>
+            <div class="phone-vf-corner tr"></div>
+            <div class="phone-vf-corner bl"></div>
+            <div class="phone-vf-corner br"></div>
+            <div class="phone-scan-line"></div>
+            <div class="phone-vf-text">Point at QR code</div>
+          </div>
+          <div class="phone-btn-row">
+            <div class="phone-btn">HISTORY</div>
+            <div class="phone-btn main">📷 SCAN</div>
+            <div class="phone-btn">SETTINGS</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- App info -->
+    <div class="download-info">
+      <div class="download-version">ANDROID · FREE · NO ADS</div>
+      <ul class="dl-features">
+        <li>Live camera QR scanning with instant results</li>
+        <li>Offline heuristic checks — no internet needed</li>
+        <li>Full scan history with threat log dashboard</li>
+        <li>VirusTotal + Safe Browsing when online</li>
+        <li>Share scan reports via WhatsApp, email</li>
+        <li>Dark mode, minimal permissions</li>
+      </ul>
+
+      <a href="#" class="dl-btn" id="apkDownload">
+        <span class="dl-btn-icon">🤖</span>
+        <div class="dl-btn-text">
+          <div class="dl-btn-title">DOWNLOAD APK</div>
+          <div class="dl-btn-sub">Android 7.0+ · ~8MB · v1.0.0</div>
+        </div>
+        <span class="dl-btn-arrow">→</span>
+      </a>
+
+      <a href="https://github.com/dhirajnxgfr/QR-threat-scanner" target="_blank" class="dl-btn">
+        <span class="dl-btn-icon">⬡</span>
+        <div class="dl-btn-text">
+          <div class="dl-btn-title">VIEW SOURCE</div>
+          <div class="dl-btn-sub">GitHub · Open Source</div>
+        </div>
+        <span class="dl-btn-arrow">→</span>
+      </a>
+
+      <div class="requirements">
+        Requires: Android 7.0 (Nougat) or higher<br>
+        Camera permission · Internet optional for cloud scan<br>
+        No account required · No data collected
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════ FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="f-logo">
+          <span class="glitch-logo">QR<span>SHIELD</span></span>
+        </div>
+        <p>Real-time QR code threat detection. Open-source, fast, and built for the security-conscious.</p>
+      </div>
+      <div class="footer-col">
+        <h4>PRODUCT</h4>
+        <a href="#demo">Live Demo</a>
+        <a href="#features">Features</a>
+        <a href="#download">Android App</a>
+        <a href="#how">How It Works</a>
+      </div>
+      <div class="footer-col">
+        <h4>PROJECT</h4>
+        <a href="https://github.com/dhirajnxgfr/QR-threat-scanner" target="_blank">GitHub</a>
+        <a href="#">Report Issue</a>
+        <a href="#">Changelog</a>
+        <a href="#">Privacy Policy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 QR SHIELD · OPEN SOURCE · MIT LICENSE</span>
+      <div class="footer-status">
+        <div class="status-dot"></div>
+        <span>ALL SYSTEMS OPERATIONAL</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
