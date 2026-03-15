@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: qr-shield-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python backend.py
+```
+
+**Create `.gitignore`** — prevents accidentally committing secrets:
+```
+.env
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+venv/
+env/
