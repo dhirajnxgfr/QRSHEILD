@@ -1,15 +1,13 @@
-
 const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*<>?/|\\[]{}~';
 const rand  = () => CHARS[Math.floor(Math.random() * CHARS.length)];
 
 // ── BACKEND CONFIG ────────────────────────────────────────────
 const BACKEND_URL     = '';
 const API_ENDPOINT    = '/api/analyze';
-const QRSHIELD_SECRET = 'change-this-to-your-secret'; // match Vercel env var
+const QRSHIELD_SECRET = 'change-this-to-your-secret';
 
 
 // ── LOAD jsQR DYNAMICALLY ─────────────────────────────────────
-// jsQR is a pure JS QR decoder — no Python libs needed on server
 (function loadJsQR() {
   const script = document.createElement('script');
   script.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js';
@@ -112,6 +110,236 @@ document.querySelectorAll('.nav-links a').forEach(a => {
 });
 
 
+// ══════════════════════════════════════════════════════════════
+//  CAMERA SCANNER MODULE
+// ══════════════════════════════════════════════════════════════
+
+let cameraStream = null;
+let cameraAnimFrame = null;
+let cameraActive = false;
+let lastQRDetected = '';
+let lastQRTime = 0;
+const QR_COOLDOWN_MS = 4000; // don't re-scan the same QR within 4s
+
+const camVideo   = document.getElementById('camVideo');
+const camCanvas  = document.getElementById('camCanvas');
+const camOverlay = document.getElementById('camOverlay');
+const camStatus  = document.getElementById('camStatus');
+
+// Tab switching
+function switchTab(tab) {
+  document.querySelectorAll('.input-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.input-tab[data-tab="${tab}"]`).classList.add('active');
+  document.getElementById(`tab-${tab}`).classList.add('active');
+
+  if (tab !== 'camera') {
+    stopCamera();
+  }
+}
+
+document.querySelectorAll('.input-tab').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+// Start camera
+async function startCamera() {
+  const startBtn = document.getElementById('camStartBtn');
+  const stopBtn  = document.getElementById('camStopBtn');
+
+  try {
+    setCamStatus('Requesting camera access…', 'pending');
+    startBtn.style.display = 'none';
+
+    const constraints = {
+      video: {
+        facingMode: { ideal: 'environment' }, // back camera on phones
+        width:  { ideal: 1280 },
+        height: { ideal: 720 }
+      }
+    };
+
+    cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+    camVideo.srcObject = cameraStream;
+    await camVideo.play();
+
+    cameraActive = true;
+    stopBtn.style.display = 'inline-flex';
+    setCamStatus('SCANNING — Point at a QR code', 'active');
+
+    // Start frame analysis loop
+    scanCameraFrame();
+
+  } catch (err) {
+    startBtn.style.display = 'inline-flex';
+    if (err.name === 'NotAllowedError') {
+      setCamStatus('Camera access denied. Allow permission and retry.', 'error');
+    } else if (err.name === 'NotFoundError') {
+      setCamStatus('No camera detected on this device.', 'error');
+    } else {
+      setCamStatus(`Camera error: ${err.message}`, 'error');
+    }
+  }
+}
+
+function stopCamera() {
+  cameraActive = false;
+  if (cameraAnimFrame) cancelAnimationFrame(cameraAnimFrame);
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(t => t.stop());
+    cameraStream = null;
+  }
+  camVideo.srcObject = null;
+  clearQROverlay();
+
+  const startBtn = document.getElementById('camStartBtn');
+  const stopBtn  = document.getElementById('camStopBtn');
+  if (startBtn) startBtn.style.display = 'inline-flex';
+  if (stopBtn)  stopBtn.style.display  = 'none';
+
+  setCamStatus('Camera stopped.', 'idle');
+}
+
+// Continuous frame scanning
+function scanCameraFrame() {
+  if (!cameraActive) return;
+
+  if (camVideo.readyState === camVideo.HAVE_ENOUGH_DATA) {
+    const ctx = camCanvas.getContext('2d');
+    camCanvas.width  = camVideo.videoWidth;
+    camCanvas.height = camVideo.videoHeight;
+    ctx.drawImage(camVideo, 0, 0);
+
+    const imageData = ctx.getImageData(0, 0, camCanvas.width, camCanvas.height);
+
+    if (typeof jsQR !== 'undefined') {
+      const code = jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: 'dontInvert'
+      });
+
+      if (code && code.data) {
+        const now = Date.now();
+        const isDuplicate = code.data === lastQRDetected && (now - lastQRTime) < QR_COOLDOWN_MS;
+
+        if (!isDuplicate) {
+          lastQRDetected = code.data;
+          lastQRTime = now;
+          drawQRCorners(code.location);
+          triggerQRFound(code.data);
+        } else {
+          drawQRCorners(code.location);
+        }
+      } else {
+        clearQROverlay();
+      }
+    }
+  }
+
+  cameraAnimFrame = requestAnimationFrame(scanCameraFrame);
+}
+
+// Draw corner brackets on overlay canvas
+function drawQRCorners(location) {
+  const overlayCanvas = document.getElementById('camOverlayCanvas');
+  if (!overlayCanvas) return;
+
+  overlayCanvas.width  = camVideo.videoWidth  || overlayCanvas.offsetWidth;
+  overlayCanvas.height = camVideo.videoHeight || overlayCanvas.offsetHeight;
+
+  const scaleX = overlayCanvas.offsetWidth  / (camVideo.videoWidth  || 1);
+  const scaleY = overlayCanvas.offsetHeight / (camVideo.videoHeight || 1);
+
+  const ctx = overlayCanvas.getContext('2d');
+  ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+
+  const corners = [
+    location.topLeftCorner,
+    location.topRightCorner,
+    location.bottomRightCorner,
+    location.bottomLeftCorner
+  ];
+
+  const cx = corners.map(p => p.x * scaleX);
+  const cy = corners.map(p => p.y * scaleY);
+
+  const armLen = Math.min(
+    Math.hypot(cx[1]-cx[0], cy[1]-cy[0]),
+    Math.hypot(cx[3]-cx[0], cy[3]-cy[0])
+  ) * 0.28;
+
+  ctx.strokeStyle = '#00ffe0';
+  ctx.lineWidth   = 3;
+  ctx.lineCap     = 'round';
+
+  // Draw L-brackets at each corner
+  const pairs = [[0,1,3],[1,0,2],[2,1,3],[3,0,2]]; // corner, adj1, adj2
+  corners.forEach((_, ci) => {
+    const bx = cx[ci], by = cy[ci];
+
+    // vector towards adjacent corners, normalized
+    function arm(from, to) {
+      const dx = cx[to]-cx[from], dy = cy[to]-cy[from];
+      const len = Math.hypot(dx,dy) || 1;
+      return { x: dx/len * armLen, y: dy/len * armLen };
+    }
+
+    const adj = ci === 0 ? [1,3] : ci === 1 ? [0,2] : ci === 2 ? [1,3] : [0,2];
+    const a1 = arm(ci, adj[0]);
+    const a2 = arm(ci, adj[1]);
+
+    ctx.beginPath();
+    ctx.moveTo(bx + a1.x, by + a1.y);
+    ctx.lineTo(bx, by);
+    ctx.lineTo(bx + a2.x, by + a2.y);
+    ctx.stroke();
+  });
+}
+
+function clearQROverlay() {
+  const oc = document.getElementById('camOverlayCanvas');
+  if (oc) {
+    const ctx = oc.getContext('2d');
+    ctx.clearRect(0, 0, oc.width, oc.height);
+  }
+}
+
+// When QR is found — flash and scan
+function triggerQRFound(data) {
+  setCamStatus('QR DETECTED — Analyzing…', 'detected');
+
+  // Flash effect on video wrapper
+  const wrapper = document.getElementById('camWrapper');
+  wrapper.classList.add('qr-flash');
+  setTimeout(() => wrapper.classList.remove('qr-flash'), 600);
+
+  // Fill URL field and run scan
+  document.getElementById('urlInput').value = data;
+  switchTab('url');
+  runScan(data);
+
+  setCamStatus(`Found: ${data.slice(0,40)}${data.length>40?'…':''}`, 'idle');
+}
+
+function setCamStatus(msg, state) {
+  if (!camStatus) return;
+  camStatus.textContent = msg;
+  camStatus.className   = `cam-status cam-status--${state}`;
+}
+
+// Capture single frame from gallery/photo
+function captureGalleryFrame() {
+  const input = document.createElement('input');
+  input.type   = 'file';
+  input.accept = 'image/*';
+  input.capture = 'environment'; // hint mobile to open camera directly
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (file) processFile(file);
+  };
+  input.click();
+}
+
+
 // ── DRAG-AND-DROP QR UPLOAD ───────────────────────────────────
 const zone = document.getElementById('uploadZone');
 
@@ -129,21 +357,21 @@ function handleFile(e) {
   if (file) processFile(file);
 }
 
-/**
- * Decodes QR from image using jsQR (runs in browser, no server needed).
- * If QR found → scans the decoded URL directly.
- * If no QR found → shows error message.
- */
 function processFile(file) {
   const label = document.getElementById('selectedFile');
   label.style.display = 'block';
+  label.style.color   = 'var(--cyan)';
   label.textContent   = '📎 ' + file.name;
+
+  // Switch to upload tab if on camera tab
+  if (document.getElementById('tab-upload').classList.contains('active') === false) {
+    switchTab('upload');
+  }
 
   const reader = new FileReader();
   reader.onload = function(ev) {
     const img = new Image();
     img.onload = function() {
-      // Draw image to canvas to extract pixel data for jsQR
       const canvas  = document.createElement('canvas');
       canvas.width  = img.width;
       canvas.height = img.height;
@@ -152,7 +380,6 @@ function processFile(file) {
 
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-      // Wait for jsQR to load if it hasn't yet
       function tryDecode(attempts) {
         if (typeof jsQR === 'undefined') {
           if (attempts > 20) {
@@ -168,12 +395,10 @@ function processFile(file) {
         });
 
         if (code && code.data) {
-          // QR decoded successfully — scan the URL
           document.getElementById('urlInput').value = code.data;
           label.textContent = `📎 ${file.name} → ${code.data.slice(0, 40)}${code.data.length > 40 ? '…' : ''}`;
           runScan(code.data);
         } else {
-          // Try inverted (some QR codes have inverted colors)
           const codeInv = jsQR(imageData.data, imageData.width, imageData.height, {
             inversionAttempts: 'onlyInvert'
           });
@@ -268,18 +493,19 @@ function _startScanUI() {
   document.getElementById('resultEmpty').style.display = 'none';
   document.getElementById('resultCard').classList.remove('show');
   document.getElementById('scanning').classList.add('show');
-  document.querySelector('.scan-btn').disabled = true;
+  const scanBtns = document.querySelectorAll('.scan-btn');
+  scanBtns.forEach(b => b.disabled = true);
 }
 
 function _endScanUI() {
   document.getElementById('scanning').classList.remove('show');
-  document.querySelector('.scan-btn').disabled = false;
+  const scanBtns = document.querySelectorAll('.scan-btn');
+  scanBtns.forEach(b => b.disabled = false);
 }
 
 
 // ═══════════════════════════════════════════════════════════════
-//  CORE: SECURE API CALL → /api/analyze
-//  QR decoding is now done in browser — backend only gets URLs
+//  CORE: API CALL → /api/analyze
 // ═══════════════════════════════════════════════════════════════
 
 async function analyzeThreat(urlInput) {
@@ -407,6 +633,11 @@ function showResult(input, result) {
   }
 
   document.getElementById('resultCard').classList.add('show');
+
+  // Scroll result panel into view on mobile
+  if (window.innerWidth < 768) {
+    document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }
 
 function showErrorResult(input, errorMsg) {
@@ -427,8 +658,16 @@ document.querySelectorAll('.feat-card, .step, .threat-card').forEach(el => obser
 
 document.getElementById('urlInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') scanURL();
-});;
+});
 
+// Stop camera when navigating away from demo section
+const demoSection = document.getElementById('demo');
+const stopCameraObserver = new IntersectionObserver(entries => {
+  if (!entries[0].isIntersecting && cameraActive) {
+    stopCamera();
+  }
+}, { threshold: 0 });
+if (demoSection) stopCameraObserver.observe(demoSection);
 document.getElementById('urlInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') scanURL();
 });
