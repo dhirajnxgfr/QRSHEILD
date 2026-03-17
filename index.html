@@ -427,68 +427,7 @@
 <!-- ============================================================
   ADD THIS CSS TO style.css  (or inside a <style> tag)
 ============================================================ -->
-<style>
-.camera-viewport {
-  position: relative;
-  width: 100%;
-  max-width: 480px;
-  margin: 1rem auto 0;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #000;
-  aspect-ratio: 4/3;
-}
 
-#camera-video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-/* animated scanning frame */
-.scan-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
-
-.scan-frame {
-  width: 60%;
-  aspect-ratio: 1;
-  border: 2px solid #00ffe0;
-  border-radius: 12px;
-  box-shadow: 0 0 0 2000px rgba(0,0,0,0.35);
-  animation: pulse-border 1.5s ease-in-out infinite;
-}
-
-@keyframes pulse-border {
-  0%, 100% { border-color: #00ffe0; box-shadow: 0 0 0 2000px rgba(0,0,0,0.35), 0 0 16px #00ffe040; }
-  50%       { border-color: #00ccff; box-shadow: 0 0 0 2000px rgba(0,0,0,0.35), 0 0 28px #00ccff80; }
-}
-
-.camera-controls {
-  display: flex;
-  gap: 0.75rem;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 0.5rem;
-}
-
-.camera-status {
-  text-align: center;
-  margin-top: 0.75rem;
-  font-size: 0.9rem;
-  min-height: 1.4em;
-}
-.camera-status.scanning { color: #00ffe0; }
-.camera-status.found    { color: #00ff88; }
-.camera-status.error    { color: #ff4d4d; }
-.camera-status.info     { color: #aaa; }
-</style>
 <!-- ══════════════════════════════════════════════════════ FOOTER -->
 <footer>
   <div class="footer-inner">
