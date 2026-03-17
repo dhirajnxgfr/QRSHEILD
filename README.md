@@ -64,8 +64,8 @@ QR Image / URL
 
 ## 🚀 Live Demo
 
-**Frontend:** [qr-shield.vercel.app](https://qr-shield.vercel.app)  
-**Backend:** [qr-shield-backend.onrender.com](https://qr-shield-backend.onrender.com/health)
+**Frontend:** [qr-shield.vercel.app](https://qrshield.vercel.app)  
+**Backend:** [qr-shield-backend.onrender.com](https://qrshield-backend.onrender.com/health)
 
 ---
 
