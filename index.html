@@ -385,49 +385,6 @@
     </div>
   </div>
 </section>
-<!-- ============================================================
-  ADD THIS INSIDE YOUR TAB BUTTONS (alongside existing tabs)
-============================================================ -->
-<button class="tab-btn" data-panel="camera-panel">
-  📷 Live Camera
-</button>
-
-
-<!-- ============================================================
-  ADD THIS ALONGSIDE YOUR EXISTING TAB PANELS
-============================================================ -->
-<div class="tab-panel" id="camera-panel">
-
-  <div class="camera-controls">
-    <button id="start-camera-btn" class="btn btn-primary">
-      📷 Start Camera
-    </button>
-    <button id="stop-camera-btn" class="btn btn-danger" style="display:none">
-      ⏹ Stop
-    </button>
-    <button id="switch-camera-btn" class="btn btn-secondary" style="display:none">
-      🔄 Flip Camera
-    </button>
-  </div>
-
-  <div class="camera-viewport">
-    <video id="camera-video" autoplay playsinline muted></video>
-    <!-- Canvas is used for frame capture (hidden) -->
-    <canvas id="camera-canvas" style="display:none"></canvas>
-    <div class="scan-overlay">
-      <div class="scan-frame"></div>
-    </div>
-  </div>
-
-  <p id="camera-status" class="camera-status"></p>
-
-</div>
-
-
-<!-- ============================================================
-  ADD THIS CSS TO style.css  (or inside a <style> tag)
-============================================================ -->
-
 <!-- ══════════════════════════════════════════════════════ FOOTER -->
 <footer>
   <div class="footer-inner">
