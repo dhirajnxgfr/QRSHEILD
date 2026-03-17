@@ -1,20 +1,3 @@
-# ═══════════════════════════════════════════════════════════════
-#  QR SHIELD — backend.py  v2.1
-#  Flask backend: QR decode + Claude AI + VirusTotal
-#
-#  SETUP:
-#    pip install flask flask-cors anthropic opencv-python-headless pyzbar pillow requests
-#
-#  ENV VARS (set on Render — NEVER hardcode keys):
-#    ANTHROPIC_API_KEY    = sk-ant-...
-#    VIRUSTOTAL_API_KEY   = your-vt-key
-#    QRSHIELD_SECRET      = any-random-string   (shared with frontend)
-#    ALLOWED_ORIGINS      = https://your-app.vercel.app
-#    RATE_LIMIT_REQUESTS  = 10
-#    RATE_LIMIT_WINDOW    = 60
-#    PORT                 = 5000
-#    DEBUG                = false
-# ═══════════════════════════════════════════════════════════════
 
 import os, re, json, base64, logging, time, threading
 from io import BytesIO
