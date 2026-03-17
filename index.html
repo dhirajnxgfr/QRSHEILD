@@ -134,11 +134,11 @@
   <div class="demo-inner">
     <div class="section-label">LIVE DEMO</div>
     <h2 class="section-title">TRY IT<br><span>NOW</span></h2>
-    <p class="section-sub">Upload a QR image or paste a URL. Our AI engine will analyze it for threats in real-time.</p>
+    <p class="section-sub">Use your camera, upload a QR image, or paste a URL. Our AI engine analyzes threats in real-time.</p>
 
     <div class="demo-layout">
 
-      <!-- Input panel -->
+      <!-- ── INPUT PANEL ─────────────────────────────────── -->
       <div class="demo-panel">
         <div class="demo-panel-head">
           <div class="demo-dot r"></div>
@@ -147,31 +147,140 @@
           <span>scanner.input</span>
         </div>
         <div class="demo-panel-body">
-          <div class="upload-zone" id="uploadZone">
-            <input type="file" id="fileInput" accept="image/*" onchange="handleFile(event)" />
-            <span class="upload-icon">⬆</span>
-            <div class="upload-text">
-              <strong>Drop QR image here</strong><br>
-              or click to browse<br>
-              PNG · JPG · WEBP
-            </div>
-          </div>
-          <div class="demo-or">OR PASTE URL</div>
-          <div class="url-row">
-            <input class="url-field" id="urlInput" type="text" placeholder="https://suspicious-link.com/pay" />
-            <button class="scan-btn" onclick="scanURL()">SCAN</button>
-          </div>
-          <div id="selectedFile" class="selected-file-label"></div>
 
-          <!-- AI Engine status -->
+          <!-- Tab Bar -->
+          <div class="input-tabs">
+            <button class="input-tab active" data-tab="camera">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4">
+                <circle cx="6" cy="6" r="2.2"/>
+                <path d="M1.5 4.5V3.5a1 1 0 011-1h1.3l.7-1h3l.7 1H9.5a1 1 0 011 1v1M1.5 4.5v4a1 1 0 001 1h7a1 1 0 001-1v-4"/>
+              </svg>
+              CAMERA
+            </button>
+            <button class="input-tab" data-tab="upload">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4">
+                <path d="M6 8V2m0 0L3.5 4.5M6 2l2.5 2.5"/>
+                <path d="M1.5 9v.5A1.5 1.5 0 003 11h6a1.5 1.5 0 001.5-1.5V9"/>
+              </svg>
+              UPLOAD
+            </button>
+            <button class="input-tab" data-tab="url">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4">
+                <path d="M5 6.5a3.5 3.5 0 005 0l1-1a3.536 3.536 0 10-5-5L5.5 1"/>
+                <path d="M7 5.5a3.5 3.5 0 00-5 0l-1 1a3.536 3.536 0 105 5L6.5 11"/>
+              </svg>
+              URL
+            </button>
+          </div>
+
+          <!-- ── CAMERA TAB ──────────────────────────────── -->
+          <div class="tab-pane active" id="tab-camera">
+
+            <!-- Video Viewfinder -->
+            <div class="cam-wrapper" id="camWrapper">
+              <video id="camVideo" playsinline muted autoplay></video>
+              <canvas id="camOverlayCanvas" class="cam-overlay-canvas"></canvas>
+              <!-- Hidden canvas for frame processing -->
+              <canvas id="camCanvas" style="display:none;"></canvas>
+
+              <!-- Corner brackets (idle state) -->
+              <div class="cam-corners" id="camCorners">
+                <div class="cam-corner tl"></div>
+                <div class="cam-corner tr"></div>
+                <div class="cam-corner bl"></div>
+                <div class="cam-corner br"></div>
+              </div>
+
+              <!-- Center crosshair -->
+              <div class="cam-reticle" id="camReticle">
+                <div class="cam-reticle-h"></div>
+                <div class="cam-reticle-v"></div>
+              </div>
+
+              <!-- Idle overlay (shown when camera is off) -->
+              <div class="cam-idle-overlay" id="camIdleOverlay">
+                <div class="cam-idle-icon">
+                  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.2">
+                    <circle cx="20" cy="20" r="7"/>
+                    <path d="M5 15V12a2 2 0 012-2h4.5l2.5-3h12l2.5 3H33a2 2 0 012 2v3M5 15v14a2 2 0 002 2h26a2 2 0 002-2V15"/>
+                  </svg>
+                </div>
+                <div class="cam-idle-text">Camera Preview</div>
+              </div>
+
+              <!-- Scan sweep line (active only) -->
+              <div class="cam-sweep" id="camSweep"></div>
+            </div>
+
+            <!-- Status bar -->
+            <div class="cam-status cam-status--idle" id="camStatus">Camera not started</div>
+
+            <!-- Controls -->
+            <div class="cam-controls">
+              <button class="cam-btn cam-btn--primary" id="camStartBtn" onclick="startCamera()">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4">
+                  <circle cx="7" cy="7" r="5.5"/>
+                  <circle cx="7" cy="7" r="2.5" fill="currentColor" stroke="none"/>
+                </svg>
+                START CAMERA
+              </button>
+              <button class="cam-btn cam-btn--stop" id="camStopBtn" onclick="stopCamera()" style="display:none;">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4">
+                  <rect x="3.5" y="3.5" width="7" height="7" rx="1" fill="currentColor" stroke="none"/>
+                </svg>
+                STOP
+              </button>
+              <button class="cam-btn cam-btn--gallery" onclick="captureGalleryFrame()">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4">
+                  <rect x="1.5" y="2.5" width="11" height="9" rx="1.2"/>
+                  <circle cx="9" cy="5.5" r="1.2"/>
+                  <path d="M1.5 8.5l3-3 2.5 2.5 2-2 2.5 2.5"/>
+                </svg>
+                GALLERY
+              </button>
+            </div>
+
+            <div class="cam-hint">
+              Auto-detects QR codes in real-time · Results appear instantly
+            </div>
+
+          </div><!-- /tab-camera -->
+
+          <!-- ── UPLOAD TAB ──────────────────────────────── -->
+          <div class="tab-pane" id="tab-upload">
+            <div class="upload-zone" id="uploadZone">
+              <input type="file" id="fileInput" accept="image/*" onchange="handleFile(event)" />
+              <span class="upload-icon">⬆</span>
+              <div class="upload-text">
+                <strong>Drop QR image here</strong><br>
+                or click to browse<br>
+                PNG · JPG · WEBP
+              </div>
+            </div>
+            <div id="selectedFile" class="selected-file-label"></div>
+          </div><!-- /tab-upload -->
+
+          <!-- ── URL TAB ─────────────────────────────────── -->
+          <div class="tab-pane" id="tab-url">
+            <div class="url-row">
+              <input class="url-field" id="urlInput" type="text" placeholder="https://suspicious-link.com/pay" />
+              <button class="scan-btn" onclick="scanURL()">SCAN</button>
+            </div>
+            <p style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:10px;letter-spacing:0.5px;">
+              Paste any URL or decoded QR code content to analyze
+            </p>
+          </div><!-- /tab-url -->
+
+          <!-- Engine status (always visible) -->
           <div class="engine-status">
             <div class="engine-dot"></div>
             <span class="engine-label">AI THREAT ENGINE ONLINE</span>
           </div>
-        </div>
-      </div>
 
-      <!-- Result panel -->
+        </div>
+      </div><!-- /demo-panel input -->
+
+      <!-- ── RESULT PANEL ────────────────────────────────── -->
       <div class="demo-panel">
         <div class="demo-panel-head">
           <div class="demo-dot r"></div>
@@ -212,7 +321,6 @@
             <div class="url-decoded" id="urlDecoded">—</div>
             <ul class="check-list" id="checkList"></ul>
 
-            <!-- AI Analysis Summary -->
             <div class="ai-summary" id="aiSummary" style="display:none;">
               <div class="ai-summary-header">
                 <span class="ai-icon">🤖</span>
@@ -223,16 +331,14 @@
           </div>
 
         </div>
-      </div>
+      </div><!-- /demo-panel result -->
     </div>
 
-    <p class="demo-note">
-     
-    </p>
+    <p class="demo-note"></p>
   </div>
 </section>
 
-<!-- ══════════════════════════════════════════════ -->
+<!-- ══════════════════════════════════════════════ HOW IT WORKS -->
 <section id="how">
   <div class="how-inner">
     <div class="section-label">PROCESS</div>
@@ -315,8 +421,6 @@
   <p class="section-sub">The QR Shield Android app brings full threat detection to your camera in real-time.</p>
 
   <div class="download-layout">
-
-    <!-- Phone mockup -->
     <div class="phone-mockup">
       <div class="phone-glow"></div>
       <div class="phone-frame">
@@ -347,7 +451,6 @@
       </div>
     </div>
 
-    <!-- App info -->
     <div class="download-info">
       <div class="download-version">ANDROID · FREE · NO ADS</div>
       <ul class="dl-features">
@@ -385,6 +488,7 @@
     </div>
   </div>
 </section>
+
 <!-- ══════════════════════════════════════════════════════ FOOTER -->
 <footer>
   <div class="footer-inner">
@@ -420,6 +524,9 @@
   </div>
 </footer>
 
+<script src="script.js"></script>
+</body>
+</html>
 <script src="script.js"></script>
 </body>
 </html>
