@@ -427,4 +427,8 @@ document.querySelectorAll('.feat-card, .step, .threat-card').forEach(el => obser
 
 document.getElementById('urlInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') scanURL();
+});;
+
+document.getElementById('urlInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') scanURL();
 });
